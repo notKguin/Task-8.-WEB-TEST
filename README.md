@@ -46,9 +46,6 @@ docker compose exec web python manage.py createsuperuser
 
 ## Тестирование
 
-Проект в docker использует PostgreSQL, но для удобства запуска тестов локально/в CI
-при выполнении `python manage.py test` автоматически включается SQLite (см. `volunteer_service/settings.py`).
-
 Запуск:
 
 ```bash
