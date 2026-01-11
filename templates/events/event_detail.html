@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% block title %}{{ event.title }}{% endblock %}
+
+{% block content %}
+  <div class="row justify-content-center">
+    <div class="col-12 col-lg-8">
+
+      <div class="card mb-3">
+        {% if event.image %}
+          <img src="{{ event.image.url }}" class="card-img-top" alt="">
+        {% endif %}
+
+        <div class="card-body">
+          <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+            <div class="small text-muted">{{ event.category.name }}</div>
+
+            <div class="d-flex gap-2">
+              <span class="badge text-bg-light border">❤️ {{ event.likes_count }}</span>
+              <span class="badge text-bg-light border">📝 {{ event.applications_count }}</span>
+            </div>
+          </div>
+
+          <h1 class="h4 mb-1">{{ event.title }}</h1>
+          <div class="text-muted small mb-3">{{ event.event_date|date:"d.m.Y H:i" }} • {{ event.location }}</div>
+
+          <div class="content-text">
+            {{ event.description|linebreaksbr }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Блок действий: снизу, единым блоком -->
+      <div class="card">
+        <div class="card-body">
+          <h2 class="h6 mb-3">Действия</h2>
+
+          {% if user.is_authenticated %}
+            <div class="d-grid gap-2">
+              <form method="post" action="{% url 'toggle_like' event.pk %}">
+                {% csrf_token %}
+                <button type="submit"
+                        class="btn w-100 {% if liked %}btn-danger{% else %}btn-outline-danger{% endif %}">
+                  {% if liked %}
+                    ❤️ Убрать лайк
+                  {% else %}
+                    🤍 Поставить лайк
+                  {% endif %}
+                  <span class="ms-2 badge text-bg-light border">Всего: {{ event.likes_count }}</span>
+                </button>
+              </form>
+
+              {% if application %}
+                <div class="alert alert-success mb-0">
+                  Заявка уже отправлена. Статус: <b>{{ application.get_status_display }}</b>
+                </div>
+              {% else %}
+                <a class="btn btn-success w-100" href="{% url 'apply_to_event' event.pk %}">
+                  📝 Подать заявку волонтёра
+                </a>
+              {% endif %}
+
+              <a class="btn btn-outline-secondary w-100" href="{% url 'event_list' %}">
+                ← Назад к списку
+              </a>
+            </div>
+          {% else %}
+            <div class="alert alert-warning">
+              Чтобы поставить лайк или подать заявку, нужно войти или зарегистрироваться.
+            </div>
+            <div class="d-grid gap-2">
+              <a class="btn btn-primary w-100" href="{% url 'login' %}?next={{ request.path }}">Войти</a>
+              <a class="btn btn-outline-primary w-100" href="{% url 'signup' %}">Регистрация</a>
+              <a class="btn btn-outline-secondary w-100" href="{% url 'event_list' %}">← Назад к списку</a>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+    </div>
+  </div>
+{% endblock %}

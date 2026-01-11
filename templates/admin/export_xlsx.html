@@ -1,0 +1,26 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block content %}
+  <h1>Экспорт XLSX</h1>
+  <p class="help">
+    Выберите таблицы (модели). Колонки в XLSX будут <b>точь-в-точь как в списке админки</b> (list_display),
+    в том же порядке и с теми же названиями.
+  </p>
+
+  <form method="post" novalidate>
+    {% csrf_token %}
+    <fieldset class="module aligned">
+      <div class="form-row">
+        {{ form.models.errors }}
+        <div><label><b>{{ form.models.label }}</b></label></div>
+        <div>{{ form.models }}</div>
+      </div>
+    </fieldset>
+
+    <div class="submit-row">
+      <input type="submit" value="Скачать XLSX" class="default">
+      <a class="button" href="/admin/">Назад</a>
+    </div>
+  </form>
+{% endblock %}

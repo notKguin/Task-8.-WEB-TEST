@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block title %}Мероприятия{% endblock %}
+{% block content %}
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <h1 class="h3 m-0">Мероприятия</h1>
+    {% if not user.is_authenticated %}
+      <span class="badge text-bg-secondary">Гость</span>
+    {% else %}
+      <span class="badge text-bg-success">Пользователь</span>
+    {% endif %}
+  </div>
+
+  <div class="row g-3">
+    {% for e in events %}
+      <div class="col-12 col-md-6 col-lg-4">
+        <div class="card h-100">
+          {% if e.image %}
+            <img src="{{ e.image.url }}" class="card-img-top" alt="">
+          {% endif %}
+
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start gap-2 mb-1">
+              <div class="small text-muted">{{ e.category.name }}</div>
+
+              <div class="d-flex gap-2">
+                <span class="badge text-bg-light border">
+                  ❤️ {{ e.likes_count }}
+                </span>
+                <span class="badge text-bg-light border">
+                  📝 {{ e.applications_count }}
+                </span>
+              </div>
+            </div>
+
+            <h5 class="card-title">{{ e.title }}</h5>
+            <div class="small text-muted">{{ e.event_date|date:"d.m.Y H:i" }} • {{ e.location }}</div>
+            <p class="card-text mt-2 text-truncate-3">{{ e.description }}</p>
+          </div>
+
+          <div class="card-footer bg-white border-0">
+            <a class="btn btn-primary w-100" href="{% url 'event_detail' e.pk %}">Подробнее</a>
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <div class="col-12">
+        <div class="alert alert-info">Пока нет мероприятий. Добавьте их в админке.</div>
+      </div>
+    {% endfor %}
+  </div>
+{% endblock %}
