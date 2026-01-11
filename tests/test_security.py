@@ -1,10 +1,10 @@
 from __future__ import annotations
 
+from django.contrib.auth import authenticate
 from django.test import TestCase
 from django.urls import reverse
-from django.contrib.auth import authenticate
 
-from core.models import Category
+from core.models import Category, Event
 from .utils import create_user
 
 
@@ -17,8 +17,9 @@ class SecurityTests(TestCase):
 
     def test_sql_injection_like_login_does_not_work(self):
         # Попытка «SQL-инъекции» через поле username должна просто не пройти аутентификацию.
-        user = create_user(username="realuser", password="RealPass12345")
+        create_user(username="realuser", password="RealPass12345")
         bad_username = "' OR 1=1 --"
+
         authed = authenticate(username=bad_username, password="anything")
         self.assertIsNone(authed)
 
@@ -28,11 +29,23 @@ class SecurityTests(TestCase):
 
     def test_xss_is_escaped_in_templates(self):
         payload = '<script>alert("xss")</script>'
-        Category.objects.create(name=payload)
+
+        category = Category.objects.create(name="Cat XSS")
+        Event.objects.create(
+            category=category,
+            title=payload,
+            description="desc",
+            event_date="2030-01-01",
+            location="loc",
+        )
 
         resp = self.client.get(reverse("event_list"))
         self.assertEqual(resp.status_code, 200)
 
-        # В шаблонах Django автоэкранирование включено по умолчанию.
-        self.assertIn("&lt;script&gt;alert(&quot;xss&quot;)&lt;/script&gt;", resp.content.decode("utf-8"))
-        self.assertNotIn(payload, resp.content.decode("utf-8"))
+        html = resp.content.decode("utf-8")
+
+        # Сырой скрипт не должен попасть в HTML (не должно быть "живого" тега)
+        self.assertNotIn(payload, html)
+
+        # Экранированный должен быть виден
+        self.assertIn("&lt;script&gt;alert(&quot;xss&quot;)&lt;/script&gt;", html)

@@ -1,22 +1,5 @@
-"
+"""Django settings for volunteer_service project."""
 
-# --- Test-friendly defaults -------------------------------------------------
-# Проект в docker работает с PostgreSQL. Чтобы `python manage.py test` запускался
-# без внешней БД (например, в CI GitHub), при запуске тестов переключаемся на SQLite.
-if "test" in sys.argv or os.getenv("DJANGO_TEST", "0") == "1":
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / "db_test.sqlite3",
-        }
-    }
-
-    # Чтобы Django Discovery Runner нашёл тесты в папке /tests без параметров:
-    # `python manage.py test`
-    if "tests" not in INSTALLED_APPS:
-        INSTALLED_APPS.append("tests")
-
-""Django settings for volunteer_service project."""
 from pathlib import Path
 import os
 import sys
@@ -29,7 +12,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-key-change-me")
 DEBUG = os.getenv("DEBUG", "0") == "1"
 
-ALLOWED_HOSTS = [h.strip() for h in os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",") if h.strip()]
+ALLOWED_HOSTS = [
+    h.strip()
+    for h in os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
+    if h.strip()
+]
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -73,6 +60,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "volunteer_service.wsgi.application"
 
+# --- Database (default: Postgres in Docker) ---------------------------------
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
@@ -83,6 +71,22 @@ DATABASES = {
         "PORT": int(os.getenv("POSTGRES_PORT", "5432")),
     }
 }
+
+# --- Test-friendly defaults -------------------------------------------------
+# Чтобы `python manage.py test` запускался без внешней БД (например, в CI),
+# при запуске тестов переключаемся на SQLite.
+if "test" in sys.argv or os.getenv("DJANGO_TEST", "0") == "1":
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db_test.sqlite3",
+        }
+    }
+
+    # Чтобы Django discovery runner нашёл тесты в папке /tests без параметров
+    # `python manage.py test`
+    if "tests" not in INSTALLED_APPS:
+        INSTALLED_APPS.append("tests")
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},

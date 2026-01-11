@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+from django.db import connection
 from django.test import TestCase
+from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 
-from core.models import VolunteerApplication, EventLike
+from core.models import EventLike, VolunteerApplication
 from .utils import create_event, create_user
 
 
@@ -79,7 +81,10 @@ class ViewsAccessAndCrudTests(TestCase):
         self.assertFalse(EventLike.objects.filter(user=self.user, event=self.event).exists())
 
     def test_event_list_query_count_is_reasonable(self):
-        # защита от N+1: список мероприятий должен грузиться малым числом запросов
-        # (шаблоны могут добавить 1-2 запроса, поэтому допускаем небольшой запас)
-        with self.assertNumQueries(5):
-            self.client.get(reverse("event_list"))
+        # защита от N+1: список мероприятий должен грузиться малым числом запросов.
+        # Правильная проверка: "не больше N", а не "ровно N".
+        with CaptureQueriesContext(connection) as ctx:
+            resp = self.client.get(reverse("event_list"))
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertLessEqual(len(ctx.captured_queries), 5)
