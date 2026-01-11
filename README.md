@@ -43,3 +43,23 @@ docker compose exec web python manage.py createsuperuser
 ## Важно
 - Пароли хранятся в зашифрованном виде штатными механизмами Django (`pbkdf2` по умолчанию).
 - Для production замените `DEBUG=0`, задайте `SECRET_KEY`, настройте `ALLOWED_HOSTS`.
+
+## Тестирование
+
+Проект в docker использует PostgreSQL, но для удобства запуска тестов локально/в CI
+при выполнении `python manage.py test` автоматически включается SQLite (см. `volunteer_service/settings.py`).
+
+Запуск:
+
+```bash
+python -m venv .venv
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+
+python manage.py test
+```
+
+Автотесты находятся в папке `tests/`.
+
+- Чек‑лист ручного тестирования: `TESTING.md`
+- Краткий отчёт о покрытии: `COVERAGE.md`

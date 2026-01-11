@@ -1,6 +1,25 @@
-"""Django settings for volunteer_service project."""
+"
+
+# --- Test-friendly defaults -------------------------------------------------
+# Проект в docker работает с PostgreSQL. Чтобы `python manage.py test` запускался
+# без внешней БД (например, в CI GitHub), при запуске тестов переключаемся на SQLite.
+if "test" in sys.argv or os.getenv("DJANGO_TEST", "0") == "1":
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db_test.sqlite3",
+        }
+    }
+
+    # Чтобы Django Discovery Runner нашёл тесты в папке /tests без параметров:
+    # `python manage.py test`
+    if "tests" not in INSTALLED_APPS:
+        INSTALLED_APPS.append("tests")
+
+""Django settings for volunteer_service project."""
 from pathlib import Path
 import os
+import sys
 from dotenv import load_dotenv
 
 load_dotenv()
