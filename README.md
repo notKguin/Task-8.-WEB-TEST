@@ -56,7 +56,18 @@ pip install -r requirements.txt
 python manage.py test
 ```
 
+Либо:
+
+```bash
+docker compose run --rm tests
+```
+
 Автотесты находятся в папке `tests/`.
 
 - Чек‑лист ручного тестирования: `TESTING.md`
 - Краткий отчёт о покрытии: `COVERAGE.md`
+
+
+
+# Тестирования связей (по вторичному ключу) на отсутствие ресурса
+# Кастомную 404

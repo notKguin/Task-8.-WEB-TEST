@@ -76,3 +76,60 @@ class ModelCreationTests(TestCase):
 
         with self.assertRaises(IntegrityError):
             EventLike.objects.create(user=user, event=event)
+
+    def test_fk_relations_on_missing_resource_event_deleted(self):
+        """
+        Тестирования связей (по внешнему ключу) на отсутствие ресурса:
+        при удалении Event связанные VolunteerApplication и EventLike
+        не должны оставаться в БД (CASCADE).
+        """
+        user = create_user(username="u_fk_1")
+        event = create_event(title="Удаляемое событие")
+
+        app = VolunteerApplication.objects.create(user=user, event=event, motivation="test")
+        like = EventLike.objects.create(user=user, event=event)
+
+        event_id = event.pk
+        app_id = app.pk
+        like_id = like.pk
+
+        # удаляем ресурс (родитель) — Event
+        Event.objects.filter(pk=event_id).delete()
+
+        # дочерние записи должны исчезнуть, иначе это "висячие" FK
+        self.assertFalse(
+            VolunteerApplication.objects.filter(pk=app_id).exists(),
+            "VolunteerApplication не должен существовать после удаления связанного Event (ожидается CASCADE).",
+        )
+        self.assertFalse(
+            EventLike.objects.filter(pk=like_id).exists(),
+            "EventLike не должен существовать после удаления связанного Event (ожидается CASCADE).",
+        )
+
+    def test_fk_relations_on_missing_resource_user_deleted(self):
+        """
+        Тестирования связей (по внешнему ключу) на отсутствие ресурса:
+        при удалении User связанные VolunteerApplication и EventLike
+        не должны оставаться в БД (CASCADE).
+        """
+        user = create_user(username="u_fk_2")
+        event = create_event(title="Событие для каскада")
+
+        app = VolunteerApplication.objects.create(user=user, event=event, motivation="test")
+        like = EventLike.objects.create(user=user, event=event)
+
+        user_id = user.pk
+        app_id = app.pk
+        like_id = like.pk
+
+        # удаляем ресурс (родитель) — User
+        get_user_model().objects.filter(pk=user_id).delete()
+
+        self.assertFalse(
+            VolunteerApplication.objects.filter(pk=app_id).exists(),
+            "VolunteerApplication не должен существовать после удаления связанного User (ожидается CASCADE).",
+        )
+        self.assertFalse(
+            EventLike.objects.filter(pk=like_id).exists(),
+            "EventLike не должен существовать после удаления связанного User (ожидается CASCADE).",
+        )
