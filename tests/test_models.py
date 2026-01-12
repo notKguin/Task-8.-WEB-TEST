@@ -81,7 +81,7 @@ class ModelCreationTests(TestCase):
         """
         Тестирования связей (по внешнему ключу) на отсутствие ресурса:
         при удалении Event связанные VolunteerApplication и EventLike
-        не должны оставаться в БД (CASCADE).
+        не должны оставаться в БД.
         """
         user = create_user(username="u_fk_1")
         event = create_event(title="Удаляемое событие")
@@ -96,21 +96,21 @@ class ModelCreationTests(TestCase):
         # удаляем ресурс (родитель) — Event
         Event.objects.filter(pk=event_id).delete()
 
-        # дочерние записи должны исчезнуть, иначе это "висячие" FK
+        # дочерние записи должны исчезнуть
         self.assertFalse(
             VolunteerApplication.objects.filter(pk=app_id).exists(),
-            "VolunteerApplication не должен существовать после удаления связанного Event (ожидается CASCADE).",
+            "VolunteerApplication не должен существовать после удаления связанного Event.",
         )
         self.assertFalse(
             EventLike.objects.filter(pk=like_id).exists(),
-            "EventLike не должен существовать после удаления связанного Event (ожидается CASCADE).",
+            "EventLike не должен существовать после удаления связанного Event.",
         )
 
     def test_fk_relations_on_missing_resource_user_deleted(self):
         """
         Тестирования связей (по внешнему ключу) на отсутствие ресурса:
         при удалении User связанные VolunteerApplication и EventLike
-        не должны оставаться в БД (CASCADE).
+        не должны оставаться в БД.
         """
         user = create_user(username="u_fk_2")
         event = create_event(title="Событие для каскада")
@@ -127,9 +127,9 @@ class ModelCreationTests(TestCase):
 
         self.assertFalse(
             VolunteerApplication.objects.filter(pk=app_id).exists(),
-            "VolunteerApplication не должен существовать после удаления связанного User (ожидается CASCADE).",
+            "VolunteerApplication не должен существовать после удаления связанного User.",
         )
         self.assertFalse(
             EventLike.objects.filter(pk=like_id).exists(),
-            "EventLike не должен существовать после удаления связанного User (ожидается CASCADE).",
+            "EventLike не должен существовать после удаления связанного User.",
         )
